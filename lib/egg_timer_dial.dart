@@ -1,13 +1,32 @@
+import 'dart:math';
+
+import 'package:eggtimer/egg_timer_knob.dart';
 import 'package:flutter/material.dart';
 
-class EggTimerDial extends StatelessWidget {
+class EggTimerDial extends StatefulWidget {
+
   final Color topGradient;
   final Color bottomGradient;
 
+  final Duration currentTime;
+  final Duration maxTime;
+  final int ticksPerSection;
+
   const EggTimerDial({
-     this.topGradient, 
-     this.bottomGradient
+    this.topGradient,
+    this.bottomGradient,
+    this.currentTime = const Duration(minutes: 0),
+    this.maxTime = const Duration(minutes: 35),
+    this.ticksPerSection = 5,
   });
+
+  @override
+  State<StatefulWidget> createState() => new _EggTimerDialState();
+}
+
+class _EggTimerDialState extends State<EggTimerDial> {
+
+  _rotationPercent() => widget.currentTime.inSeconds / widget.maxTime.inSeconds;
 
   @override
   Widget build(BuildContext context) {
@@ -18,108 +37,150 @@ class EggTimerDial extends StatelessWidget {
         child: new AspectRatio(
             aspectRatio: 1.0,
             child: new Container(
-              decoration: new BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: new LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [topGradient, bottomGradient],
-                  ),
-                  boxShadow: [
-                    new BoxShadow(
-                      color: const Color(0x44000000),
-                      blurRadius: 2.0,
-                      spreadRadius: 1.0,
-                      offset: const Offset(0.0, 1.0),
-                    )
-                  ]),
-              child: new Padding(
-                padding: const EdgeInsets.all(65.0),
+                decoration: new BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: new LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [widget.topGradient, widget.bottomGradient],
+                    ),
+                    boxShadow: [
+                      new BoxShadow(
+                        color: const Color(0x44000000),
+                        blurRadius: 2.0,
+                        spreadRadius: 1.0,
+                        offset: const Offset(0.0, 1.0),
+                      )
+                    ]),
                 child: new Stack(
-                    children: [
-                      new Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: new CustomPaint(
-                          painter: new ArrowPainter(),
+                  children: <Widget>[
+                    new Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      padding: const EdgeInsets.all(55.0),
+                      child: new CustomPaint(
+                        painter: new TickPainter(
+                          tickCount: widget.maxTime.inMinutes,
+                          ticksPerSection: widget.ticksPerSection
                         ),
                       ),
-                      new Container(
-                    padding: const EdgeInsets.all(10.0),
-                    decoration: new BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: new LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [topGradient, bottomGradient],
-                      ),
-                      boxShadow: [
-                        new BoxShadow(
-                          color: const Color(0x44000000),
-                          blurRadius: 2.0,
-                          spreadRadius: 1.0,
-                          offset: const Offset(0.0, 1.0),
-                        )
-                      ]),
-                  child: new Container(
-                    decoration: new BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: new Border.all(
-                      color: const Color(0xFFDFDFDF),
-                      width: 1.5,
-                    )
-                    
                     ),
-              child: new Center(
-                  child: new Image.network(
-                    'https://avatars3.githubusercontent.com/u/14101776?s=400&v=4',
-                    width: 50.0,
-                    height: 50.0,
-                    color: Colors.black,
-                  ),
-              ),
-                  )
-                  ),
-                                  ]
-                ),
-              )
-            )
-            ),
+                    new Padding(
+                      padding: const EdgeInsets.all(65.0),
+                      child: new EggTimerKnob(
+                        topGradient: widget.topGradient,
+                        bottomGradient: widget.bottomGradient,
+                        rotationPercent: _rotationPercent(),
+                      ),
+                    ),
+                  ],
+                ))),
       ),
     );
   }
 }
 
-class ArrowPainter extends CustomPainter {
+class TickPainter extends CustomPainter {
+  static const LONG_TICK = 14.0;
+  static const SHORT_TICK = 4.0;
 
-  final Paint dialArrowPaint;
+  final int tickCount;
+  final int ticksPerSection;
+  final int ticksInset;
+  final Paint tickPaint;
+  final TextPainter textPainter;
+  final TextStyle textStyle;
 
-  ArrowPainter() : dialArrowPaint = new Paint() {
-    dialArrowPaint.color = Colors.black;
-    dialArrowPaint.style = PaintingStyle.fill;
+  TickPainter({
+    this.tickCount = 35,
+    this.ticksPerSection = 5,
+    this.ticksInset = 0,
+  }) : tickPaint = new Paint(),
+       textPainter = new TextPainter(
+         textAlign: TextAlign.center,
+         textDirection: TextDirection.ltr,
+       ),
+       textStyle = const TextStyle(
+         color: Colors.black,
+         fontFamily: 'BebasNeue',
+         fontSize: 20.0
+       ) 
+  {
+    tickPaint.color = Colors.black;
+    tickPaint.strokeWidth = 1.5;
   }
 
   @override
   void paint(Canvas canvas, Size size) {
+    canvas.translate(size.width / 2, size.height / 2);
+
     canvas.save();
 
-    canvas.translate(size.width / 2, 0.0);
+    final radius = size.width / 2;
 
-    var path = new Path();
-    path.moveTo(0.0, -10.0);
-    path.lineTo(10.0, 5.0);
-    path.lineTo(-10.0, 5.0);
-    path.close();
+    for(var i = 0; i < tickCount; ++i) {
+      final tickLength = i % ticksPerSection == 0 ? LONG_TICK : SHORT_TICK;
 
-    canvas.drawPath(path, dialArrowPaint);
-    canvas.drawShadow(path, Colors.black, 3.0, false);
+      canvas.drawLine(
+        new Offset(0.0, -radius), 
+        new Offset(0.0, -radius - tickLength),
+        tickPaint
+      );
+
+      if (i % ticksPerSection == 0) {
+        //Paint Text
+        canvas.save();
+        canvas.translate(0.0, -(size.width / 2) - 30.0);
+
+        textPainter.text = new TextSpan(
+          text: '$i',
+          style: textStyle,
+        );
+        //Layout the text
+        textPainter.layout();
+
+        // Determine the text quadrant (go go cartesian quadrants)
+        final tickPercent = i / tickCount;
+        var quadrant;
+
+        if (tickPercent < 0.25) {
+          quadrant = 1;
+        } else if (tickPercent < 0.5) {
+          quadrant = 4;
+        } else if (tickPercent < 0.75) {
+          quadrant = 3;
+        } else {
+          quadrant = 2;
+        }
+
+        switch (quadrant) {
+          case 4:
+            canvas.rotate(-pi / 2);
+            break;
+          case 2:
+          case 3:
+            canvas.rotate(pi / 2);
+            break;
+        }
+
+        textPainter.paint(
+          canvas, 
+          new Offset(
+            -textPainter.width / 2, 
+            -textPainter.height / 2)
+        );
+
+        canvas.restore();
+      }
+
+      canvas.rotate(2 * pi / tickCount);
+    }
 
     canvas.restore();
   }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    // TODO: implement shouldRepaint
     return true;
   }
 
