@@ -1,3 +1,4 @@
+import 'package:eggtimer/egg_timer.dart';
 import 'package:eggtimer/egg_timer_controls.dart';
 import 'package:eggtimer/egg_timer_dial.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +14,25 @@ const Color GRADIENT_BOTTOM = const Color(0xFFE8E8E8);
 
 void main() => runApp(new MyApp());
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() {
+    return new _MyAppState();
+  }
+}
+
+class _MyAppState extends State<MyApp> {
+  final EggTimer eggTimer;
+  
+  _MyAppState() : eggTimer = new EggTimer(maxTime: const Duration(minutes: 35));
+
+  _onTimeSelected(Duration newTime) {
+    setState(() {
+          eggTimer.currentTime = newTime;
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -36,11 +54,10 @@ class MyApp extends StatelessWidget {
               children: [
                 new EggTimerTimeDisplay(),
                 new EggTimerDial(
-                  topGradient: GRADIENT_TOP,
-                  bottomGradient: GRADIENT_BOTTOM,
-                  currentTime: const Duration(seconds: 0),
-                  maxTime: const Duration(minutes: 35),
+                  currentTime: eggTimer.currentTime,
+                  maxTime: eggTimer.maxTime,
                   ticksPerSection: 5,
+                  onTimeSelected: _onTimeSelected,
                 ),
                 new Expanded(
                   child: new Container(),

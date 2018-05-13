@@ -5,19 +5,20 @@ import 'package:flutter/material.dart';
 
 class EggTimerDial extends StatefulWidget {
 
-  final Color topGradient;
-  final Color bottomGradient;
+  final Color topGradient = const Color(0xFFF5F5F5);
+  final Color bottomGradient = const Color(0xFFE8E8E8);
 
   final Duration currentTime;
   final Duration maxTime;
   final int ticksPerSection;
 
+  final Function(Duration) onTimeSelected;
+
   const EggTimerDial({
-    this.topGradient,
-    this.bottomGradient,
     this.currentTime = const Duration(minutes: 0),
     this.maxTime = const Duration(minutes: 35),
     this.ticksPerSection = 5,
+    this.onTimeSelected,
   });
 
   @override

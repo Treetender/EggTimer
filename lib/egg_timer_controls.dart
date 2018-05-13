@@ -15,7 +15,7 @@ class _EggTimerControlsState extends State<EggTimerControls> {
           children: [
             new EggTimerButton(
               icon: Icons.refresh,
-              text: 'RESET',
+              text: 'RESTART',
             ),
             new Expanded(child: new Container()),
             new EggTimerButton(
