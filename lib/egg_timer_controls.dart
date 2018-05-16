@@ -2,6 +2,12 @@ import 'package:eggtimer/egg_timer_button.dart';
 import 'package:flutter/material.dart';
 
 class EggTimerControls extends StatefulWidget {
+  final Function onReset;
+
+  const EggTimerControls({
+    this.onReset
+  });
+
   @override
   _EggTimerControlsState createState() => new _EggTimerControlsState();
 }
@@ -21,6 +27,7 @@ class _EggTimerControlsState extends State<EggTimerControls> {
             new EggTimerButton(
               icon: Icons.arrow_back,
               text: 'RESET',
+              onButtonPressed: widget.onReset,
             ),
           ],
         ),

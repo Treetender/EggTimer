@@ -14,34 +14,16 @@ class EggTimerTimeDisplay extends StatefulWidget {
 
 class _EggTimerTimeDisplayState extends State<EggTimerTimeDisplay> {
 
-  String _currentTime;
+  String _displayTimeAsString() {
 
-  void setDisplayTime(Duration time) {
-    setState(() => currentTime = time);
-  }
+    final seconds = widget.displayTime.inSeconds.remainder(Duration.secondsPerMinute);
+    final displaySeconds = seconds < 10 ? '0$seconds' : '$seconds';
 
-  String _displayTimeAsString(Duration time) {
-
-    int seconds = time.inSeconds.remainder(Duration.secondsPerMinute);
-    var displaySeconds = seconds < 10 ? '0$seconds' : '$seconds';
-
-    if (time.inMinutes < 10) {
-      return '0${time.inMinutes}:$displaySeconds';
+    if (widget.displayTime.inMinutes < 10) {
+      return '0${widget.displayTime.inMinutes}:$displaySeconds';
     }
 
-    return '${time.inMinutes}:$displaySeconds';
-  }
-
-  get currentTime => _currentTime;
-
-  set currentTime(Duration newTime) {
-    _currentTime = _displayTimeAsString(newTime);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    currentTime = widget.displayTime;
+    return '${widget.displayTime.inMinutes}:$displaySeconds';
   }
 
   @override
@@ -49,7 +31,7 @@ class _EggTimerTimeDisplayState extends State<EggTimerTimeDisplay> {
     return new Padding(
       padding: const EdgeInsets.only(top: 15.0),
       child: new Text(
-        currentTime,
+        _displayTimeAsString(),
         textAlign: TextAlign.center,
         style: const TextStyle(
             fontSize: 150.0,

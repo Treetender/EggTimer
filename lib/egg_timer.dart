@@ -13,7 +13,7 @@ class EggTimer {
 
   set currentTime(newTime) {
     if (state == EggTimerState.ready) {
-      _currentTime = newTime;
+      _currentTime = newTime > maxTime ? newTime - maxTime : newTime;
     }
   }
 

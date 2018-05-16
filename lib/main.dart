@@ -25,12 +25,18 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final EggTimer eggTimer;
   
-  _MyAppState() : eggTimer = new EggTimer(maxTime: const Duration(minutes: 35));
+  _MyAppState() :
+    eggTimer = new EggTimer(maxTime: const Duration(minutes: 35));
+  
 
   _onTimeSelected(Duration newTime) {
-    setState(() {
-          eggTimer.currentTime = newTime;
-        });
+    setState(() { 
+      eggTimer.currentTime = newTime; 
+    });
+  }
+
+  _onResetPressed() {
+ 
   }
 
   @override
@@ -52,7 +58,9 @@ class _MyAppState extends State<MyApp> {
           child: new Center(
             child: new Column(
               children: [
-                new EggTimerTimeDisplay(),
+                new EggTimerTimeDisplay(
+                  displayTime: eggTimer.currentTime,
+                ),
                 new EggTimerDial(
                   currentTime: eggTimer.currentTime,
                   maxTime: eggTimer.maxTime,
@@ -62,7 +70,9 @@ class _MyAppState extends State<MyApp> {
                 new Expanded(
                   child: new Container(),
                 ),
-                new EggTimerControls()
+                new EggTimerControls(
+                  onReset: _onResetPressed(),
+                )
               ],
             ),
           ),

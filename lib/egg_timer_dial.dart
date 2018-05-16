@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:eggtimer/egg_timer_knob.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttery/gestures.dart';
 
 class EggTimerDial extends StatefulWidget {
 
@@ -31,7 +32,11 @@ class _EggTimerDialState extends State<EggTimerDial> {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return new DialTurnGestureDetector(
+      currentTime: widget.currentTime,
+      maxTime: widget.maxTime,
+      onTimeSelected: widget.onTimeSelected,
+      child: Container(
       width: double.infinity,
       child: new Padding(
         padding: const EdgeInsets.only(left: 45.0, right: 45.0),
@@ -75,11 +80,69 @@ class _EggTimerDialState extends State<EggTimerDial> {
                       ),
                     ),
                   ],
-                ))),
+                )
+              )
+            ),
       ),
+    )
     );
   }
 }
+
+class DialTurnGestureDetector extends StatefulWidget {
+  final Duration currentTime;
+  final Duration maxTime;
+  final Function(Duration) onTimeSelected;
+  final child;
+
+  DialTurnGestureDetector({
+    this.child,
+    this.currentTime,
+    this.maxTime,
+    this.onTimeSelected,
+  });
+
+  @override
+  _DialTurnGestureDetectorState createState() => new _DialTurnGestureDetectorState();
+}
+
+class _DialTurnGestureDetectorState extends State<DialTurnGestureDetector> {
+  PolarCoord startDragCoord;
+  Duration startDragTime;
+
+  _onRadialDragStart(PolarCoord coord) {
+     startDragCoord = coord;
+     startDragTime = widget.currentTime;
+  }
+
+  _onRadialDragUpdate(PolarCoord coord) {
+    if (startDragCoord != null) {
+      final angleDiff = coord.angle - startDragCoord.angle;
+      final angleDiffPercent = angleDiff / (2 * pi);
+      final timeDiff = (widget.maxTime.inSeconds * angleDiffPercent).round();
+      final newTime = Duration(seconds: (startDragTime.inSeconds + timeDiff));
+
+      widget.onTimeSelected(newTime);
+    }
+  }
+
+  _onRadialDragEnd() {
+    startDragCoord = null;
+    startDragTime = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RadialDragGestureDetector(
+      child: widget.child,
+      onRadialDragStart: _onRadialDragStart,
+      onRadialDragUpdate: _onRadialDragUpdate,
+      onRadialDragEnd: _onRadialDragEnd,
+    );
+  }
+}
+
+
 
 class TickPainter extends CustomPainter {
   static const LONG_TICK = 14.0;
