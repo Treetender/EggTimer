@@ -14,12 +14,14 @@ class EggTimerDial extends StatefulWidget {
   final int ticksPerSection;
 
   final Function(Duration) onTimeSelected;
+  final Function(Duration) onDialStopTurning;
 
   const EggTimerDial({
     this.currentTime = const Duration(minutes: 0),
     this.maxTime = const Duration(minutes: 35),
     this.ticksPerSection = 5,
     this.onTimeSelected,
+    this.onDialStopTurning,
   });
 
   @override
@@ -93,6 +95,7 @@ class DialTurnGestureDetector extends StatefulWidget {
   final Duration currentTime;
   final Duration maxTime;
   final Function(Duration) onTimeSelected;
+  final Function(Duration) onDialStopTurning;
   final child;
 
   DialTurnGestureDetector({
@@ -100,6 +103,7 @@ class DialTurnGestureDetector extends StatefulWidget {
     this.currentTime,
     this.maxTime,
     this.onTimeSelected,
+    this.onDialStopTurning,
   });
 
   @override
@@ -109,6 +113,7 @@ class DialTurnGestureDetector extends StatefulWidget {
 class _DialTurnGestureDetectorState extends State<DialTurnGestureDetector> {
   PolarCoord startDragCoord;
   Duration startDragTime;
+  Duration selectedTime;
 
   _onRadialDragStart(PolarCoord coord) {
      startDragCoord = coord;
@@ -120,15 +125,17 @@ class _DialTurnGestureDetectorState extends State<DialTurnGestureDetector> {
       final angleDiff = coord.angle - startDragCoord.angle;
       final angleDiffPercent = angleDiff / (2 * pi);
       final timeDiff = (widget.maxTime.inSeconds * angleDiffPercent).round();
-      final newTime = Duration(seconds: (startDragTime.inSeconds + timeDiff));
+      selectedTime = Duration(seconds: (startDragTime.inSeconds + timeDiff));
 
-      widget.onTimeSelected(newTime);
+      print('$angleDiffPercent');
+      widget.onTimeSelected(selectedTime);
     }
   }
 
   _onRadialDragEnd() {
+    widget.onDialStopTurning(selectedTime);
     startDragCoord = null;
-    startDragTime = null;
+
   }
 
   @override

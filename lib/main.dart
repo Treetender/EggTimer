@@ -35,6 +35,13 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  _onDialStopTurning(Duration newTime) {
+    setState(() {
+          eggTimer.currentTime = newTime;
+          eggTimer.resume();
+    });
+  }
+
   _onResetPressed() {
  
   }
@@ -66,6 +73,7 @@ class _MyAppState extends State<MyApp> {
                   maxTime: eggTimer.maxTime,
                   ticksPerSection: 5,
                   onTimeSelected: _onTimeSelected,
+                  onDialStopTurning: _onDialStopTurning,
                 ),
                 new Expanded(
                   child: new Container(),
