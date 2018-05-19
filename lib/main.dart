@@ -5,10 +5,6 @@ import 'package:flutter/material.dart';
 
 import 'egg_timer_time_display.dart';
 
-import 'package:fluttery/animations.dart';
-import 'package:fluttery/framing.dart';
-import 'package:fluttery/gestures.dart';
-
 const Color GRADIENT_TOP = const Color(0xFFF5F5F5);
 const Color GRADIENT_BOTTOM = const Color(0xFFE8E8E8);
 
