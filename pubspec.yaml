@@ -1,5 +1,5 @@
 name: eggtimer
-description: A new Flutter project.
+description: A good ol' fashioned dial timer on your mobile device.
 
 dependencies:
   flutter:
