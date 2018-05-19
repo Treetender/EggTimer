@@ -1,45 +1,118 @@
+import 'package:eggtimer/egg_timer.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class EggTimerTimeDisplay extends StatefulWidget {
-
-  final Duration displayTime;
+  final EggTimerState eggTimerState;
+  final Duration selectionTime;
+  final Duration countDownTime;
 
   EggTimerTimeDisplay({
-    this.displayTime = const Duration(seconds: 0)
+    this.eggTimerState,
+    this.selectionTime = const Duration(seconds: 0),
+    this.countDownTime = const Duration(seconds: 0),
   });
 
   @override
   _EggTimerTimeDisplayState createState() => new _EggTimerTimeDisplayState();
 }
 
-class _EggTimerTimeDisplayState extends State<EggTimerTimeDisplay> {
+class _EggTimerTimeDisplayState extends State<EggTimerTimeDisplay> 
+  with TickerProviderStateMixin {
 
-  String _displayTimeAsString() {
+  final DateFormat selectionTimeFormat = new DateFormat('mm');
+  final DateFormat countdownTimeFormat = new DateFormat('mm:ss');
 
-    final seconds = widget.displayTime.inSeconds.remainder(Duration.secondsPerMinute);
-    final displaySeconds = seconds < 10 ? '0$seconds' : '$seconds';
+  AnimationController selectionTimeSlideController;
+  AnimationController countdownTimeFadeController;
 
-    if (widget.displayTime.inMinutes < 10) {
-      return '0${widget.displayTime.inMinutes}:$displaySeconds';
-    }
+  get formattedSelectionTime {
+    var dateTime = new DateTime(new DateTime.now().year, 0, 0, 0, 0, widget.selectionTime.inSeconds);
+    return selectionTimeFormat.format(dateTime);
+  }
 
-    return '${widget.displayTime.inMinutes}:$displaySeconds';
+  get formattedCountdownTime {
+    var dateTime = new DateTime(new DateTime.now().year, 0, 0, 0, 0, widget.countDownTime.inSeconds);
+    return countdownTimeFormat.format(dateTime);
   }
 
   @override
+    void initState() {
+      // TODO: implement initState
+      super.initState();
+
+      selectionTimeSlideController = new AnimationController(
+        duration: const Duration(milliseconds: 150),
+        vsync: this
+      )
+      ..addListener(() {
+        setState(() {});
+      });
+
+      countdownTimeFadeController = new AnimationController(
+        duration: const Duration(milliseconds: 150),
+        vsync: this
+      )
+      ..addListener(() {
+        setState(() {});
+      });
+
+      countdownTimeFadeController.value = 1.0;
+    }
+
+  @override
+    void dispose() {
+      // TODO: implement dispose
+      selectionTimeSlideController.dispose();
+      countdownTimeFadeController.dispose();
+      super.dispose();
+    }
+
+  @override
   Widget build(BuildContext context) {
+    if (widget.eggTimerState == EggTimerState.ready) {
+      selectionTimeSlideController.reverse();
+      countdownTimeFadeController.forward();
+    } else {
+      selectionTimeSlideController.forward();
+      countdownTimeFadeController.reverse();
+    }
+
     return new Padding(
       padding: const EdgeInsets.only(top: 15.0),
-      child: new Text(
-        _displayTimeAsString(),
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-            fontSize: 150.0,
-            color: Colors.black,
-            fontFamily: 'BebasNeue',
-            fontWeight: FontWeight.bold,
-            letterSpacing: 10.0
+      child: new Stack(
+        alignment: Alignment.center,
+        children: [
+          new Transform(
+              transform: new Matrix4.translationValues(
+                  0.0,
+                  -200.0 * selectionTimeSlideController.value,
+                  0.0),
+              child: new Text(
+                formattedSelectionTime,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 150.0,
+                  color: Colors.black,
+                  fontFamily: 'BebasNeue',
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 10.0),
+              ),
+          ),
+          new Opacity(
+            opacity: 1.0 - countdownTimeFadeController.value,
+            child: new Text(
+              formattedCountdownTime,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 150.0,
+                  color: Colors.black,
+                  fontFamily: 'BebasNeue',
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 10.0),
             ),
+          ),
+        ],
       ),
     );
   }

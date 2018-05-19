@@ -1,9 +1,9 @@
 import 'dart:async';
 
 class EggTimer {
-
   final Duration maxTime;
   final Stopwatch stopwatch = Stopwatch();
+  final Function onTimerUpdate;
 
   EggTimerState state = EggTimerState.ready;
   Duration _currentTime = const Duration(seconds: 0);
@@ -11,25 +11,60 @@ class EggTimer {
 
   EggTimer({
     this.maxTime,
+    this.onTimerUpdate,
   });
 
   get currentTime => _currentTime;
 
   set currentTime(newTime) {
     if (state == EggTimerState.ready) {
-      _currentTime = newTime > maxTime ? newTime - maxTime : newTime;
+      _currentTime = newTime;
+      lastStartTime = currentTime;
     }
   }
 
   resume() {
-    state = EggTimerState.running;
-    lastStartTime = currentTime;
-    stopwatch.start();
-    _tick();
+    if (state != EggTimerState.running) {
+      state = EggTimerState.running;
+      stopwatch.start();
+
+      _tick();
+    }
   }
 
   pause() {
-    state = EggTimerState.paused;
+    if (state == EggTimerState.running) {
+      state = EggTimerState.paused;
+      stopwatch.stop();
+
+      if (null != onTimerUpdate) {
+        onTimerUpdate();
+      }
+    }
+  }
+
+  reset() {
+    if (state == EggTimerState.paused) {
+      state = EggTimerState.ready;
+      _currentTime = const Duration(seconds: 0);
+      lastStartTime = currentTime;
+      stopwatch.reset();
+
+      if (null != onTimerUpdate) {
+        onTimerUpdate();
+      }
+    }
+  }
+
+  restart() {
+    if (state == EggTimerState.paused) {
+      state = EggTimerState.running;
+      _currentTime = lastStartTime;
+      stopwatch.reset();
+      stopwatch.start();
+
+      _tick();
+    }
   }
 
   _tick() {
@@ -40,9 +75,13 @@ class EggTimer {
       new Timer(const Duration(seconds: 1), _tick);
     } else {
       state = EggTimerState.ready;
+      lastStartTime = const Duration(seconds: 0);
+    }
+
+    if (null != onTimerUpdate) {
+      onTimerUpdate();
     }
   }
-
 }
 
 enum EggTimerState {

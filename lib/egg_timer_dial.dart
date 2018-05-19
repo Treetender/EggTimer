@@ -38,6 +38,7 @@ class _EggTimerDialState extends State<EggTimerDial> {
       currentTime: widget.currentTime,
       maxTime: widget.maxTime,
       onTimeSelected: widget.onTimeSelected,
+      onDialStopTurning: widget.onDialStopTurning,
       child: Container(
       width: double.infinity,
       child: new Padding(
@@ -127,7 +128,6 @@ class _DialTurnGestureDetectorState extends State<DialTurnGestureDetector> {
       final timeDiff = (widget.maxTime.inSeconds * angleDiffPercent).round();
       selectedTime = Duration(seconds: (startDragTime.inSeconds + timeDiff));
 
-      print('$angleDiffPercent');
       widget.onTimeSelected(selectedTime);
     }
   }
